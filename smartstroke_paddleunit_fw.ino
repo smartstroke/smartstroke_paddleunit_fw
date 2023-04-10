@@ -1,72 +1,100 @@
-#include <esp_now.h>
-#include <WiFi.h>
+//----------------------------------------
+//          Definitions
+//----------------------------------------
+#define BLUE_LED  16
+#define GREEN_LED 9
+#define ADC1_PIN  4
+#define ADC2_PIN  5
 
-// REPLACE WITH THE RECEIVER'S MAC Address
-uint8_t basestationAddress[] = {0xcc, 0xdb, 0xa7, 0x14, 0x35, 0x38};
+#define BUFFER_MAX 512
 
-// Structure example to send data 
-// Must match the receiver structure
-typedef struct struct_message {
-    int id; // must be unique for each sender board
-    int x;
-    int y;
-} struct_message;
+//----------------------------------------
+//          Prototype Functions
+//----------------------------------------
+void ARDUINO_ISR_ATTR TimerIntr0();
+void ARDUINO_ISR_ATTR TimerIntr1();
+void flushSerialInput();
 
-// Create a struct_message called myData
-struct_message myData;
+//----------------------------------------
+//          Globals
+//----------------------------------------
+int fsr1 = 0;  // holds force sensing resisitor current adc value
+int fsr2 = 0;
+int time2 = 0;
+char buffer[BUFFER_MAX];         //buffer for serial output
+hw_timer_t* timerSample = NULL;  //timer for sampling 100Hz
+hw_timer_t* timerLED = NULL;     //timer for led 1Hz
+int blueLEDState = LOW;
+int greenLEDState = LOW;
 
-// Create peer interface
-esp_now_peer_info_t peerInfo;
-
-// callback when data is sent
-void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
-  Serial.print("\r\nLast Packet Send Status:\t");
-  Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Delivery Success" : "Delivery Fail");
-}
-
+//----------------------------------------
+//          Setup
+//----------------------------------------
 void setup() {
-  // Init Serial Monitor
-  Serial.begin(115200);
+  //set pin modes
+  pinMode(BLUE_LED, OUTPUT);
+  pinMode(GREEN_LED, OUTPUT);
+  pinMode(ADC1_PIN, INPUT);
+  pinMode(ADC2_PIN, INPUT);
+  adcAttachPin(ADC1_PIN);
+  adcAttachPin(ADC2_PIN);
 
-  // Set device as a Wi-Fi Station
-  WiFi.mode(WIFI_STA);
-  Serial.print("ESP Board MAC Address:  ");
-  Serial.println(WiFi.macAddress());
-  // Init ESP-NOW
-  if (esp_now_init() != ESP_OK) {
-    Serial.println("Error initializing ESP-NOW");
+  //init serial
+  Serial.begin(921600);
+
+  //setup timer0 for sampling at 100Hz
+  timerSample = timerBegin(0, 80, true);
+  timerAttachInterrupt(timerSample, &TimerIntr0, true);
+  timerAlarmWrite(timerSample, 10000, true);
+  timerAlarmEnable(timerSample);
+
+  //setup timer1 for led at 1Hz
+  timerLED = timerBegin(1, 80, true);
+  timerAttachInterrupt(timerLED, &TimerIntr1, true);
+  timerAlarmWrite(timerLED, 1000000, true);
+  timerAlarmEnable(timerLED);
+}
+
+//----------------------------------------
+//          Main Loop
+//----------------------------------------
+void loop() {
+  //wait for input from matlab
+  if (!Serial.available()) {
     return;
   }
+  flushSerialInput();
 
-  // Once ESPNow is successfully Init, we will register for Send CB to
-  // get the status of Trasnmitted packet
-  esp_now_register_send_cb(OnDataSent);
+  //send "TIME(ms) FSR1 FSR2\r\n" over serial output
+  sprintf(buffer, "%d %d %d\r\n", time2, fsr1, fsr2);
+  Serial.print(buffer);
+}
 
-  // Register peer
-  memcpy(peerInfo.peer_addr, basestationAddress, 6);
-  peerInfo.channel = 0;
-  peerInfo.encrypt = false;
-  // Add peer        
-  if (esp_now_add_peer(&peerInfo) != ESP_OK){
-    Serial.println("Failed to add peer");
-    return;
+//----------------------------------------
+//          Helper Functions
+//----------------------------------------
+void flushSerialInput() {
+  while (Serial.available()) {
+    Serial.read();
   }
 }
 
-void loop() {
-  // Set values to send
-  myData.id = 1;
-  myData.x = 10;
-  myData.y = 20;
-  
-  // Send message via ESP-NOW
-  esp_err_t result = esp_now_send(basestationAddress, (uint8_t *) &myData, sizeof(myData));
-   
-  if (result == ESP_OK) {      
-    Serial.println("Sent with success");
-  }
-  else {
-    Serial.println("Error sending the data");
-  }
-  delay(10000);
+//----------------------------------------
+//          Timer Interrupt Function
+//----------------------------------------
+void ARDUINO_ISR_ATTR TimerIntr0() {
+  //read analog values every 10ms/100Hz
+  fsr1 = analogRead(ADC1_PIN);
+  fsr2 = analogRead(ADC2_PIN);
+  time2 = (unsigned long)millis();
+
+  //toggle blue LED
+  blueLEDState = !blueLEDState;
+  digitalWrite(BLUE_LED, blueLEDState);
+}
+
+void ARDUINO_ISR_ATTR TimerIntr1() {
+  //toggle green LED
+  greenLEDState = !greenLEDState;
+  digitalWrite(GREEN_LED, greenLEDState);
 }
