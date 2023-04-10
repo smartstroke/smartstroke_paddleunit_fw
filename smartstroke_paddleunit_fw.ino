@@ -79,13 +79,27 @@ void flushSerialInput() {
   }
 }
 
+#define OVERSAMPLE 20
+
+int fsrAvg1;
+int fsrAvg2;
+
 //----------------------------------------
 //          Timer Interrupt Function
 //----------------------------------------
 void ARDUINO_ISR_ATTR TimerIntr0() {
   //read analog values every 10ms/100Hz
-  fsr1 = analogRead(ADC1_PIN);
-  fsr2 = analogRead(ADC2_PIN);
+  //over samples the pin by the OVERSAMPLE number and averages it out to get a more accuarte reading
+  fsrAvg1 = 0;
+  fsrAvg2 = 0;
+  
+  for (int i = 0; i < OVERSAMPLE; i++) {
+    fsrAvg1 += analogRead(ADC1_PIN);
+    fsrAvg2 += analogRead(ADC2_PIN);
+  }
+
+  fsr1 = fsrAvg1/OVERSAMPLE;
+  fsr2 = fsrAvg2/OVERSAMPLE;
   time2 = (unsigned long)millis();
 
   //toggle blue LED
