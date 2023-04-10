@@ -32,14 +32,14 @@ DIP (ON: Short to ground OFF: Disconnected) (Use internal pullup? I screwed up a
 
 ## Boot Mode
 
-To get into DFU mode, set dip switch 1 (BOOT) to ON. Then reset board. The board should be now able to be programmed via USB or UART0. After programming move dip switch 1 (BOOT) back to OFF and reset board. Board should now function.
+To get into DFU mode, set dip switch 1 (BOOT) to ON. Then reset board. The board should be now able to be programmed via USB or UART0. After programming move dip switch 1 (BOOT) back to OFF and reset board. Board should now function. Errors include: Wrong boot mode detected (0x8)!
 
 ![bootfipswitch](https://i.imgur.com/mhKzBrW.png)
 
 ## USB Auto Reset
 
-If the board will not auto reset from USB then you might need to reprogram the bootloader.
-To do so from the Ardunio IDE use the "burn bootloader" option as seen below. Errors include: Connnecting......, problem with the hardware...., 
+If the board will not auto reset from USB when programming then you might need to reprogram the bootloader.
+To do so from the Ardunio IDE use the "burn bootloader" option as seen below. Errors include: Connecting......................................, problem with the hardware...., 
 
 ![bootloader](https://i.imgur.com/1UKCGS1.png)
 
