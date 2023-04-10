@@ -66,7 +66,7 @@ void loop() {
   flushSerialInput();
 
   //send "TIME(ms) FSR1 FSR2\r\n" over serial output
-  sprintf(buffer, "%d %d %d\r\n", time2, fsr1, fsr2);
+  sprintf(buffer, "%d %d %d\r\n", time2, map(fsr1, 0, 4096, 0, 5000), map(fsr2, 0, 4096, 0, 5000));
   Serial.print(buffer);
 }
 
