@@ -74,7 +74,8 @@ hw_timer_t* timerLED = NULL;  //timer for sampling 100Hz
 int blueLEDState = LOW;
 SPIClass * hspi = NULL;
 char buffer[BUFFER_MAX];         //buffer for serial output
-int16_t accX, accY, accZ, gyroX, gyroY, gyroZ, fsr, lastSampleTime;
+int16_t accX, accY, accZ, gyroX, gyroY, gyroZ, fsr;
+int32_t lastSampleTime;
 
 //----------------------------------------
 //          Setup
@@ -145,14 +146,14 @@ void loop() {
   Serial.println("Loop");
   // Set values to send
   myData.id = 1;
-  myData.time = 12.001;
-  myData.AccX = 11.234; 
-  myData.AccY = -10.566; 
-  myData.AccZ = 7.401; 
-  myData.ADC = 13.401; 
-  myData.GyroX = 34.234; 
-  myData.GyroY = 21.566; 
-  myData.GyroZ = 9.401; 
+  myData.time = lastSampleTime;
+  myData.AccX = accX; 
+  myData.AccY = accY; 
+  myData.AccZ = accZ; 
+  myData.ADC = fsr; 
+  myData.GyroX = gyroX; 
+  myData.GyroY = gyroY; 
+  myData.GyroZ = gyroZ; 
   
   // Send message via ESP-NOW
   digitalWrite(GREEN_LED, HIGH);
