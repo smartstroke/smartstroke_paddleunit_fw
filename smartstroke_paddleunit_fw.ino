@@ -6,7 +6,8 @@
 #define ADC1_PIN  4
 #define ADC2_PIN  5
 
-#define BUFFER_MAX 512
+#define BUFFER_MAX        512
+#define SERIAL_BAUD_RATE  115200
 
 //----------------------------------------
 //          Prototype Functions
@@ -40,7 +41,7 @@ void setup() {
   adcAttachPin(ADC2_PIN);
 
   //init serial
-  Serial.begin(921600);
+  Serial.begin(SERIAL_BAUD_RATE);
 
   //setup timer0 for sampling at 100Hz
   timerSample = timerBegin(0, 80, true);
@@ -66,7 +67,7 @@ void loop() {
   flushSerialInput();
 
   //send "TIME(ms) FSR1 FSR2\r\n" over serial output
-  sprintf(buffer, "%d %d %d\r\n", time2, map(fsr1, 0, 4096, 0, 5000), map(fsr2, 0, 4096, 0, 5000));
+  sprintf(buffer, "%d %d %d\r\n", time2, map(fsr1, 0, 4096, 5000, 0), map(fsr2, 0, 4096, 5000, 0)); //invert signals
   Serial.print(buffer);
 }
 
