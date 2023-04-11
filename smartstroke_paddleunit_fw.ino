@@ -1,6 +1,29 @@
+//----------------------------------------
+//          Includes
+//----------------------------------------
 #include <esp_now.h>
 #include <WiFi.h>
 
+//----------------------------------------
+//          Definitions
+//----------------------------------------
+#define BLUE_LED  16
+#define GREEN_LED 9
+#define ADC1_PIN  4
+#define ADC2_PIN  5
+
+#define BUFFER_MAX        512
+#define SERIAL_BAUD_RATE  115200
+
+//----------------------------------------
+//          Prototype Functions
+//----------------------------------------
+void ARDUINO_ISR_ATTR TimerIntr0();
+void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status);
+
+//----------------------------------------
+//          Globals
+//----------------------------------------
 // REPLACE WITH THE RECEIVER'S MAC Address
 uint8_t basestationAddress[] = {0xcc, 0xdb, 0xa7, 0x14, 0x35, 0x38};
 
@@ -18,12 +41,20 @@ struct_message myData;
 // Create peer interface
 esp_now_peer_info_t peerInfo;
 
+hw_timer_t* timerSample = NULL;  //timer for sampling 100Hz
+
+//----------------------------------------
+//          Helper Functions
+//----------------------------------------
 // callback when data is sent
 void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
   Serial.print("\r\nLast Packet Send Status:\t");
   Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Delivery Success" : "Delivery Fail");
 }
 
+//----------------------------------------
+//          Setup
+//----------------------------------------
 void setup() {
   // Init Serial Monitor
   Serial.begin(115200);
@@ -53,6 +84,9 @@ void setup() {
   }
 }
 
+//----------------------------------------
+//          Main Loop
+//----------------------------------------
 void loop() {
   // Set values to send
   myData.id = 1;
@@ -69,4 +103,14 @@ void loop() {
     Serial.println("Error sending the data");
   }
   delay(10000);
+}
+
+//----------------------------------------
+//          Timer Interrupt Function
+//----------------------------------------
+void ARDUINO_ISR_ATTR TimerIntr0() {
+
+  //toggle blue LED
+  blueLEDState = !blueLEDState;
+  digitalWrite(BLUE_LED, blueLEDState);
 }
