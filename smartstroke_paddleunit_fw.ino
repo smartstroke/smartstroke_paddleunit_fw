@@ -8,6 +8,8 @@
 //----------------------------------------
 //          Definitions
 //----------------------------------------
+#define ID 1
+
 #define BLUE_LED  16
 #define GREEN_LED 9
 #define ADC1_PIN  4
@@ -45,7 +47,7 @@ int16_t spiReadSensor(SPIClass *spi, uint8_t address);
 //          Globals
 //----------------------------------------
 // REPLACE WITH THE RECEIVER'S MAC Address
-uint8_t basestationAddress[] = {0x8c, 0xaa, 0xb5, 0x8c, 0x4a, 0x38};
+uint8_t basestationAddress[] = {0xcc, 0xdb, 0xa7, 0x14, 0x35, 0x38};
 
 // Structure example to send data 
 // Must match the receiver structure
@@ -86,6 +88,8 @@ void setup() {
   pinMode(BLUE_LED, OUTPUT);
   pinMode(GREEN_LED, OUTPUT);
   pinMode(ADC1_PIN, INPUT);
+  adcAttachPin(ADC1_PIN);
+  pinMode(ADC2_PIN, INPUT);
   adcAttachPin(ADC1_PIN);
 
   // Init Serial Monitor
@@ -145,7 +149,7 @@ void setup() {
 void loop() {
   Serial.println("Loop");
   // Set values to send
-  myData.id = 1;
+  myData.id = ID;
   myData.time = lastSampleTime;
   myData.AccX = accX; 
   myData.AccY = accY; 
@@ -171,7 +175,7 @@ void loop() {
   // sprintf(buffer, "X:%d Y:%d Z:%d\r\n", int16_t(spiReadSensor(hspi, GYRO_XOUT_H)), int16_t(spiReadSensor(hspi, GYRO_YOUT_H)), int16_t(spiReadSensor(hspi, GYRO_ZOUT_H)));
   //Serial.print(buffer);
 
-  delay(10);
+  delay(20);
 }
 
 //----------------------------------------
@@ -239,7 +243,7 @@ void ARDUINO_ISR_ATTR TimerIntr1() {
   accZ = spiReadSensor(hspi, ACCEL_ZOUT_H);
 
   //read gyro
-  gyroX = spiReadSensor(hspi, GYRO_XOUT_H);
+  gyroX = analogRead(ADC2_PIN);
   gyroY = spiReadSensor(hspi, GYRO_YOUT_H);
   gyroZ = spiReadSensor(hspi, GYRO_ZOUT_H);
 
