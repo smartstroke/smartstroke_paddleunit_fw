@@ -11,30 +11,32 @@
 ## Pinout
 
 Leds
-- Blue LED: IO16
-- Green LED: IO9
+- Blue LED: IO0
+- Green LED: NO GREEN LED
 
 I2C/ADC
-- I2C SCL: IO4
-- I2C SCA: IO5
+- I2C SCL: NOT AVAILABLE
+- I2C SCA: NOT AVAILABLE
 
 IMU/SPI
-- IMU CS:: IO18
-- IMU SDI: IO19
-- IMU SCK: IO20
-- IMU SDO: IO21
-- IMU INT: IO22
+- IMU CS:: IO10
+- IMU SDI: IO7
+- IMU SCK: IO2
+- IMU SDO: IO6
+- IMU INT: NOT AVAILABLE
 
-DIP (ON: Short to ground OFF: Disconnected) (Use internal pullup? I screwed up and made external pull downs not pull ups. Do not use R14/R15)
-- BOOT: IO0
-- JTAG: IO3
-- IO15: IO15
+FSR
+- FSR1: IO5
+- FSR2: IO4
+- FSR3: IO3
+- FSR4: IO1
+- FSR5: IO0 (SHARED WITH LED)
 
 ## Boot Mode
 
-To get into DFU mode, set dip switch 1 (BOOT) to ON. Then reset board. The board should be now able to be programmed via USB or UART0. After programming move dip switch 1 (BOOT) back to OFF and reset board. Board should now function. Errors include: Wrong boot mode detected (0x8)!
+To get into DFU mode, depress BOOT button. Then reset board. The board should be now able to be programmed via USB or UART0. Board should now function. This board should automatically be able to be programmed upon pluggin in USB. Errors include: Wrong boot mode detected (0x8)!
 
-![bootfipswitch](https://i.imgur.com/mhKzBrW.png)
+![board](https://i.imgur.com/qkQjWE7.png)
 
 ## USB Auto Reset
 
