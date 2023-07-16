@@ -57,13 +57,7 @@ int connected = 0;
 typedef struct struct_message {
     int id; // must be unique for each sender board
     long int time;
-    int AccX;
-    int AccY;
-    int AccZ;
     int ADC;
-    int GyroX;
-    int GyroY;
-    int GyroZ;
 } struct_message;
 
 // Create a struct_message called myData
@@ -189,13 +183,7 @@ void loop() {
   // Set values to send
   myData.id = DEVICE_ID;
   myData.time = lastSampleTime;
-  myData.AccX = 11.234; 
-  myData.AccY = -10.566; 
-  myData.AccZ = 7.401; 
   myData.ADC = fsr;
-  myData.GyroX = 34.234; 
-  myData.GyroY = 21.566; 
-  myData.GyroZ = 9.401; 
   // Send message via ESP-NOW
   
   Serial.println(ID);
